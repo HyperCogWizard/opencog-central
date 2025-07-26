@@ -79,30 +79,30 @@ jobs:
           sudo ldconfig
           cd ../..
 
-      # 5. Build and Install CogServer
-      - name: Build and Install CogServer
+      # 5. Build and Install AtomSpace Storage
+      - name: Build and Install AtomSpace Storage
         run: |
           # Clean existing directory
-          rm -rf cogserver
+          rm -rf atomspace-storage
           # Clone the repository
-          git clone https://github.com/opencog/cogserver.git
-          mkdir -p cogserver/build
-          cd cogserver/build
+          git clone https://github.com/opencog/atomspace-storage.git
+          mkdir -p atomspace-storage/build
+          cd atomspace-storage/build
           cmake -DCMAKE_BUILD_TYPE=Release ..
           make -j2
           sudo make install
           sudo ldconfig
           cd ../..
-
-      # 6. Build and Install OpenCog
-      - name: Build and Install OpenCog
+          
+      # 6. Build and Install MoSES
+      - name: Build and Install MoSES
         run: |
           # Clean existing directory
-          rm -rf opencog
+          rm -rf moses
           # Clone the repository
-          git clone https://github.com/opencog/opencog.git
-          mkdir -p opencog/build
-          cd opencog/build
+          git clone https://github.com/opencog/moses.git
+          mkdir -p moses/build
+          cd moses/build
           cmake -DCMAKE_BUILD_TYPE=Release ..
           make -j2
           sudo make install
@@ -124,21 +124,6 @@ jobs:
           sudo ldconfig
           cd ../..
 
-      # 8. Build and Install URE
-      - name: Build and Install URE
-        run: |
-          # Clean existing directory
-          rm -rf ure
-          # Clone the repository
-          git clone https://github.com/opencog/ure.git
-          mkdir -p ure/build
-          cd ure/build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-          make -j2
-          sudo make install
-          sudo ldconfig
-          cd ../..
-
       # 9. Build and Install Unify
       - name: Build and Install Unify
         run: |
@@ -148,6 +133,21 @@ jobs:
           git clone https://github.com/opencog/unify.git
           mkdir -p unify/build
           cd unify/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # 8. Build and Install URE
+      - name: Build and Install URE
+        run: |
+          # Clean existing directory
+          rm -rf ure
+          # Clone the repository
+          git clone https://github.com/opencog/ure.git
+          mkdir -p ure/build
+          cd ure/build
           cmake -DCMAKE_BUILD_TYPE=Release ..
           make -j2
           sudo make install
@@ -178,6 +178,36 @@ jobs:
           git clone https://github.com/opencog/miner.git
           mkdir -p miner/build
           cd miner/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # . Build and Install CogServer
+      - name: Build and Install CogServer
+        run: |
+          # Clean existing directory
+          rm -rf cogserver
+          # Clone the repository
+          git clone https://github.com/opencog/cogserver.git
+          mkdir -p cogserver/build
+          cd cogserver/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # . Build and Install OpenCog
+      - name: Build and Install OpenCog
+        run: |
+          # Clean existing directory
+          rm -rf opencog
+          # Clone the repository
+          git clone https://github.com/opencog/opencog.git
+          mkdir -p opencog/build
+          cd opencog/build
           cmake -DCMAKE_BUILD_TYPE=Release ..
           make -j2
           sudo make install
