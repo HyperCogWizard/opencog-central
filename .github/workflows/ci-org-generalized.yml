@@ -80,6 +80,21 @@ jobs:
           sudo ldconfig
           cd ../..
 
+      # Build and Install atomSpace-storage
+      - name: Build and Install atomSpace-storage
+        run: |
+          # Clean existing directory
+          rm -rf atomspace-storage
+          # Clone the repository
+          git clone https://github.com/opencog/atomspace-storage.git
+          mkdir -p atomspace-storage/build
+          cd atomspace-storage/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
       # Build and Install cogserver
       - name: Build and Install cogserver
         run: |
