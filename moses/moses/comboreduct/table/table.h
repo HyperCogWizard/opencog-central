@@ -116,7 +116,7 @@ struct push_back_visitor : public boost::static_visitor<>
     template<typename Seq> void operator()(Seq& seq) const {
         std::stringstream ss;
         ss << "You can't push_back " << _value << " in container ";
-        ostream_container(ss, seq);
+        opencog::ostream_container(ss, seq);
         OC_ASSERT(false, ss.str());
     }
     const T& _value;
@@ -206,7 +206,7 @@ struct insert_at_visitor : public boost::static_visitor<>
     template<typename Seq> void operator()(Seq& seq) const {
         std::stringstream ss;
         ss << "You can't insert " << _v << " at " << _pos << " in container ";
-        ostream_container(ss, seq);
+        opencog::ostream_container(ss, seq);
         OC_ASSERT(false, ss.str());
     }
     int _pos;
