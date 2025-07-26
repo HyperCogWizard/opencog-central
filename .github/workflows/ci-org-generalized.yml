@@ -95,30 +95,15 @@ jobs:
           sudo ldconfig
           cd ../..
 
-      # Build and Install opencog
-      - name: Build and Install opencog
+      # Build and Install unify
+      - name: Build and Install unify
         run: |
           # Clean existing directory
-          rm -rf opencog
+          rm -rf unify
           # Clone the repository
-          git clone https://github.com/opencog/opencog.git
-          mkdir -p opencog/build
-          cd opencog/build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-          make -j2
-          sudo make install
-          sudo ldconfig
-          cd ../..
-
-      # Build and Install asmoses
-      - name: Build and Install asmoses
-        run: |
-          # Clean existing directory
-          rm -rf asmoses
-          # Clone the repository
-          git clone https://github.com/opencog/asmoses.git
-          mkdir -p asmoses/build
-          cd asmoses/build
+          git clone https://github.com/opencog/unify.git
+          mkdir -p unify/build
+          cd unify/build
           cmake -DCMAKE_BUILD_TYPE=Release ..
           make -j2
           sudo make install
@@ -140,15 +125,15 @@ jobs:
           sudo ldconfig
           cd ../..
 
-      # Build and Install unify
-      - name: Build and Install unify
+      # Build and Install spacetime
+      - name: Build and Install spacetime
         run: |
           # Clean existing directory
-          rm -rf unify
+          rm -rf spacetime
           # Clone the repository
-          git clone https://github.com/opencog/unify.git
-          mkdir -p unify/build
-          cd unify/build
+          git clone https://github.com/opencog/spacetime.git
+          mkdir -p spacetime/build
+          cd spacetime/build
           cmake -DCMAKE_BUILD_TYPE=Release ..
           make -j2
           sudo make install
@@ -185,6 +170,171 @@ jobs:
           sudo ldconfig
           cd ../..
 
+      # Build and Install pln
+      - name: Build and Install pln
+        run: |
+          # Clean existing directory
+          rm -rf pln
+          # Clone the repository
+          git clone https://github.com/opencog/pln.git
+          mkdir -p pln/build
+          cd pln/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # Build and Install asmoses
+      - name: Build and Install asmoses
+        run: |
+          # Clean existing directory
+          rm -rf asmoses
+          # Clone the repository
+          git clone https://github.com/opencog/asmoses.git
+          mkdir -p asmoses/build
+          cd asmoses/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # Build and Install moses
+      - name: Build and Install moses
+        run: |
+          # Clean existing directory
+          rm -rf moses
+          # Clone the repository
+          git clone https://github.com/opencog/moses.git
+          mkdir -p moses/build
+          cd moses/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # Build and Install opencog
+      - name: Build and Install opencog
+        run: |
+          # Clean existing directory
+          rm -rf opencog
+          # Clone the repository
+          git clone https://github.com/opencog/opencog.git
+          mkdir -p opencog/build
+          cd opencog/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # Build and Install lg-atomese
+      - name: Build and Install lg-atomese
+        run: |
+          # Clean existing directory
+          rm -rf lg-atomese
+          # Clone the repository
+          git clone https://github.com/opencog/lg-atomese.git
+          mkdir -p lg-atomese/build
+          cd lg-atomese/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # Build and Install learn
+      - name: Build and Install learn
+        run: |
+          # Clean existing directory
+          rm -rf learn
+          # Clone the repository
+          git clone https://github.com/opencog/learn.git
+          mkdir -p learn/build
+          cd learn/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # Build and Install atomspace-rocks
+      - name: Build and Install atomspace-rocks
+        run: |
+          # Clean existing directory
+          rm -rf atomspace-rocks
+          # Clone the repository
+          git clone https://github.com/opencog/atomspace-rocks.git
+          mkdir -p atomspace-rocks/build
+          cd atomspace-rocks/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # Build and Install atomspace-restful
+      - name: Build and Install atomspace-restful
+        run: |
+          # Clean existing directory
+          rm -rf atomspace-restful
+          # Clone the repository
+          git clone https://github.com/opencog/atomspace-restful.git
+          mkdir -p atomspace-restful/build
+          cd atomspace-restful/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # Build and Install pattern-index
+      - name: Build and Install pattern-index
+        run: |
+          # Clean existing directory
+          rm -rf pattern-index
+          # Clone the repository
+          git clone https://github.com/opencog/pattern-index.git
+          mkdir -p pattern-index/build
+          cd pattern-index/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # Build and Install vision
+      - name: Build and Install vision
+        run: |
+          # Clean existing directory
+          rm -rf vision
+          # Clone the repository
+          git clone https://github.com/opencog/vision.git
+          mkdir -p vision/build
+          cd vision/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
+      # Build and Install benchmark
+      - name: Build and Install benchmark
+        run: |
+          # Clean existing directory
+          rm -rf benchmark
+          # Clone the repository
+          git clone https://github.com/opencog/benchmark.git
+          mkdir -p benchmark/build
+          cd benchmark/build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j2
+          sudo make install
+          sudo ldconfig
+          cd ../..
+
       # Run Tests for Each Component
       - name: Run Tests
         run: |
@@ -206,14 +356,8 @@ jobs:
           make check ARGS="$MAKEFLAGS"
           cd ../..
 
-          # opencog Tests
-          cd opencog/build
-          make tests
-          make check ARGS="$MAKEFLAGS"
-          cd ../..
-
-          # asmoses Tests
-          cd asmoses/build
+          # unify Tests
+          cd unify/build
           make tests
           make check ARGS="$MAKEFLAGS"
           cd ../..
@@ -224,8 +368,8 @@ jobs:
           make check ARGS="$MAKEFLAGS"
           cd ../..
 
-          # unify Tests
-          cd unify/build
+          # spacetime Tests
+          cd spacetime/build
           make tests
           make check ARGS="$MAKEFLAGS"
           cd ../..
@@ -242,6 +386,72 @@ jobs:
           make check ARGS="$MAKEFLAGS"
           cd ../..
 
+          # pln Tests
+          cd pln/build
+          make tests
+          make check ARGS="$MAKEFLAGS"
+          cd ../..
+
+          # asmoses Tests
+          cd asmoses/build
+          make tests
+          make check ARGS="$MAKEFLAGS"
+          cd ../..
+
+          # moses Tests
+          cd moses/build
+          make tests
+          make check ARGS="$MAKEFLAGS"
+          cd ../..
+
+          # opencog Tests
+          cd opencog/build
+          make tests
+          make check ARGS="$MAKEFLAGS"
+          cd ../..
+
+          # lg-atomese Tests
+          cd lg-atomese/build
+          make tests
+          make check ARGS="$MAKEFLAGS"
+          cd ../..
+
+          # learn Tests
+          cd learn/build
+          make tests
+          make check ARGS="$MAKEFLAGS"
+          cd ../..
+
+          # atomspace-rocks Tests
+          cd atomspace-rocks/build
+          make tests
+          make check ARGS="$MAKEFLAGS"
+          cd ../..
+
+          # atomspace-restful Tests
+          cd atomspace-restful/build
+          make tests
+          make check ARGS="$MAKEFLAGS"
+          cd ../..
+
+          # pattern-index Tests
+          cd pattern-index/build
+          make tests
+          make check ARGS="$MAKEFLAGS"
+          cd ../..
+
+          # vision Tests
+          cd vision/build
+          make tests
+          make check ARGS="$MAKEFLAGS"
+          cd ../..
+
+          # benchmark Tests
+          cd benchmark/build
+          make tests
+          make check ARGS="$MAKEFLAGS"
+          cd ../..
+
       # Upload Test Logs
       - name: Upload Test Logs
         if: always()
@@ -252,12 +462,22 @@ jobs:
             cogutil/build/Testing/Temporary/LastTest.log
             atomspace/build/Testing/Temporary/LastTest.log
             cogserver/build/Testing/Temporary/LastTest.log
-            opencog/build/Testing/Temporary/LastTest.log
-            asmoses/build/Testing/Temporary/LastTest.log
-            ure/build/Testing/Temporary/LastTest.log
             unify/build/Testing/Temporary/LastTest.log
+            ure/build/Testing/Temporary/LastTest.log
+            spacetime/build/Testing/Temporary/LastTest.log
             attention/build/Testing/Temporary/LastTest.log
             miner/build/Testing/Temporary/LastTest.log
+            pln/build/Testing/Temporary/LastTest.log
+            asmoses/build/Testing/Temporary/LastTest.log
+            moses/build/Testing/Temporary/LastTest.log
+            opencog/build/Testing/Temporary/LastTest.log
+            lg-atomese/build/Testing/Temporary/LastTest.log
+            learn/build/Testing/Temporary/LastTest.log
+            atomspace-rocks/build/Testing/Temporary/LastTest.log
+            atomspace-restful/build/Testing/Temporary/LastTest.log
+            pattern-index/build/Testing/Temporary/LastTest.log
+            vision/build/Testing/Temporary/LastTest.log
+            benchmark/build/Testing/Temporary/LastTest.log
 
       # (Optional) Package Components
       - name: Package Components
@@ -278,14 +498,9 @@ jobs:
           make package || echo "cogserver package target not defined."
           cd ../..
 
-          # opencog Packaging
-          cd opencog/build
-          make package || echo "opencog package target not defined."
-          cd ../..
-
-          # asmoses Packaging
-          cd asmoses/build
-          make package || echo "asmoses package target not defined."
+          # unify Packaging
+          cd unify/build
+          make package || echo "unify package target not defined."
           cd ../..
 
           # ure Packaging
@@ -293,9 +508,9 @@ jobs:
           make package || echo "ure package target not defined."
           cd ../..
 
-          # unify Packaging
-          cd unify/build
-          make package || echo "unify package target not defined."
+          # spacetime Packaging
+          cd spacetime/build
+          make package || echo "spacetime package target not defined."
           cd ../..
 
           # attention Packaging
@@ -308,6 +523,61 @@ jobs:
           make package || echo "miner package target not defined."
           cd ../..
 
+          # pln Packaging
+          cd pln/build
+          make package || echo "pln package target not defined."
+          cd ../..
+
+          # asmoses Packaging
+          cd asmoses/build
+          make package || echo "asmoses package target not defined."
+          cd ../..
+
+          # moses Packaging
+          cd moses/build
+          make package || echo "moses package target not defined."
+          cd ../..
+
+          # opencog Packaging
+          cd opencog/build
+          make package || echo "opencog package target not defined."
+          cd ../..
+
+          # lg-atomese Packaging
+          cd lg-atomese/build
+          make package || echo "lg-atomese package target not defined."
+          cd ../..
+
+          # learn Packaging
+          cd learn/build
+          make package || echo "learn package target not defined."
+          cd ../..
+
+          # atomspace-rocks Packaging
+          cd atomspace-rocks/build
+          make package || echo "atomspace-rocks package target not defined."
+          cd ../..
+
+          # atomspace-restful Packaging
+          cd atomspace-restful/build
+          make package || echo "atomspace-restful package target not defined."
+          cd ../..
+
+          # pattern-index Packaging
+          cd pattern-index/build
+          make package || echo "pattern-index package target not defined."
+          cd ../..
+
+          # vision Packaging
+          cd vision/build
+          make package || echo "vision package target not defined."
+          cd ../..
+
+          # benchmark Packaging
+          cd benchmark/build
+          make package || echo "benchmark package target not defined."
+          cd ../..
+
       # Upload Build Artifacts
       - name: Upload Build Artifacts
         if: always()
@@ -318,9 +588,19 @@ jobs:
             cogutil/build/
             atomspace/build/
             cogserver/build/
-            opencog/build/
-            asmoses/build/
-            ure/build/
             unify/build/
+            ure/build/
+            spacetime/build/
             attention/build/
             miner/build/
+            pln/build/
+            asmoses/build/
+            moses/build/
+            opencog/build/
+            lg-atomese/build/
+            learn/build/
+            atomspace-rocks/build/
+            atomspace-restful/build/
+            pattern-index/build/
+            vision/build/
+            benchmark/build/

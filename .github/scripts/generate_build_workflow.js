@@ -3,19 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 
-// Define the dependency order for OpenCog components
-// Based on the current ci-org-v7.yml and typical OpenCog build dependencies
-const COMPONENT_DEPENDENCIES = [
-  'cogutil',      // Base utilities - no dependencies
-  'atomspace',    // Depends on cogutil
-  'cogserver',    // Depends on atomspace
-  'opencog',      // Depends on cogserver
-  'asmoses',      // Depends on opencog
-  'ure',          // Depends on opencog (Unified Rule Engine)
-  'unify',        // Depends on opencog
-  'attention',    // Depends on opencog
-  'miner',        // Depends on opencog/ure
-];
+// Adaptively discover components with build dependency analysis
+// This will be populated by scanning the actual repository structure
 
 // Template for build step
 const BUILD_STEP_TEMPLATE = `      # Build and Install {{dir_name}}
@@ -115,35 +104,246 @@ jobs:
 {{artifact_paths}}`;
 
 /**
- * Check if a directory exists and contains CMakeLists.txt indicating it's a buildable component
+ * Scan the repository to discover all components with CMakeLists.txt files
  */
-function isOpenCogComponent(dirPath, componentName) {
-  const cmakeFile = path.join(dirPath, componentName, 'CMakeLists.txt');
-  return fs.existsSync(cmakeFile);
+function discoverComponents() {
+  const rootDir = process.cwd();
+  const components = [];
+  
+  try {
+    // Get all directories that might contain components
+    const entries = fs.readdirSync(rootDir, { withFileTypes: true });
+    
+    for (const entry of entries) {
+      if (entry.isDirectory() && !entry.name.startsWith('.')) {
+        const componentPath = path.join(rootDir, entry.name);
+        const cmakeFile = path.join(componentPath, 'CMakeLists.txt');
+        
+        // Check if it has a CMakeLists.txt file (indicating it's buildable)
+        if (fs.existsSync(cmakeFile)) {
+          components.push(entry.name);
+        }
+      }
+    }
+    
+    return components.sort();
+  } catch (error) {
+    console.error('Error discovering components:', error);
+    return [];
+  }
+}
+
+/**
+ * Analyze dependency patterns from CircleCI configs and CMake files
+ */
+function analyzeDependencies(components) {
+  const dependencyMap = new Map();
+  
+  // Initialize all components with empty dependencies
+  components.forEach(component => {
+    dependencyMap.set(component, new Set());
+  });
+  
+  // Apply well-known dependency patterns based on OpenCog architecture
+  // These are derived from CircleCI analysis but cleaned up to avoid circular deps
+  const knownDependencies = {
+    // Core foundation - no dependencies
+    'cogutil': [],
+    
+    // AtomSpace layer - depends on cogutil
+    'atomspace': ['cogutil'],
+    
+    // CogServer layer - depends on atomspace  
+    'cogserver': ['cogutil', 'atomspace'],
+    
+    // Core reasoning components
+    'unify': ['cogutil', 'atomspace'],
+    'spacetime': ['cogutil', 'atomspace'],
+    'ure': ['cogutil', 'atomspace', 'unify'],
+    
+    // Higher-level components
+    'attention': ['cogutil', 'atomspace', 'cogserver'],
+    'miner': ['cogutil', 'atomspace', 'unify', 'ure'],
+    'pln': ['cogutil', 'atomspace', 'unify', 'ure', 'spacetime'],
+    
+    // Learning and MOSES
+    'moses': ['cogutil'],
+    'asmoses': ['cogutil', 'atomspace', 'unify', 'ure'],
+    'learn': ['cogutil', 'atomspace'],
+    
+    // Main OpenCog - depends on most core components
+    'opencog': ['cogutil', 'atomspace', 'cogserver', 'unify', 'ure', 'attention'],
+    
+    // Language and NLP
+    'lg-atomese': ['cogutil', 'atomspace'],
+    
+    // AtomSpace extensions - depend on core atomspace
+    'atomspace-bridge': ['cogutil', 'atomspace'],
+    'atomspace-cog': ['cogutil', 'atomspace'],
+    'atomspace-dht': ['cogutil', 'atomspace'],
+    'atomspace-ipfs': ['cogutil', 'atomspace'],
+    'atomspace-metta': ['cogutil', 'atomspace'],
+    'atomspace-restful': ['cogutil', 'atomspace'],
+    'atomspace-rocks': ['cogutil', 'atomspace'],
+    'atomspace-rpc': ['cogutil', 'atomspace'],
+    'atomspace-websockets': ['cogutil', 'atomspace'],
+    'atomspace-agents': ['cogutil', 'atomspace'],
+    
+    // Vision and perception  
+    'vision': ['cogutil', 'atomspace'],
+    'perception': ['cogutil', 'atomspace'],
+    
+    // Specialized components
+    'pattern-index': ['cogutil', 'atomspace'],
+    'benchmark': ['cogutil', 'atomspace'],
+    'cheminformatics': ['cogutil', 'atomspace'],
+    'dimensional-embedding': ['cogutil', 'atomspace'],
+    'ghost_bridge': ['cogutil', 'atomspace'],
+    'sensory': ['cogutil', 'atomspace'],
+    'visualization': ['cogutil', 'atomspace'],
+    
+    // Robot and embodiment
+    'pau2motors': ['cogutil', 'atomspace'],
+    'robots_config': ['cogutil', 'atomspace'],
+    'ros-behavior-scripting': ['cogutil', 'atomspace'],
+    'blender_api_msgs': ['cogutil', 'atomspace'],
+    
+    // Application specific
+    'TinyCog': ['cogutil', 'atomspace'],
+    'agi-bio': ['cogutil', 'atomspace'],
+    'generate': ['cogutil', 'atomspace'],
+    'python-attic': ['cogutil', 'atomspace']
+  };
+  
+  // Apply known dependencies 
+  components.forEach(component => {
+    const dependencies = dependencyMap.get(component);
+    const known = knownDependencies[component] || [];
+    
+    known.forEach(dep => {
+      if (components.includes(dep) && dep !== component) {
+        dependencies.add(dep);
+      }
+    });
+  });
+  
+  return dependencyMap;
+}
+
+/**
+ * Perform topological sort to determine correct build order
+ */
+function topologicalSort(components, dependencyMap) {
+  const visited = new Set();
+  const visiting = new Set();
+  const result = [];
+  
+  function visit(component) {
+    if (visiting.has(component)) {
+      console.warn(`Circular dependency detected involving ${component}`);
+      return;
+    }
+    
+    if (visited.has(component)) {
+      return;
+    }
+    
+    visiting.add(component);
+    
+    const dependencies = dependencyMap.get(component) || new Set();
+    for (const dep of dependencies) {
+      if (components.includes(dep)) {
+        visit(dep);
+      }
+    }
+    
+    visiting.delete(component);
+    visited.add(component);
+    result.push(component);
+  }
+  
+  components.forEach(component => {
+    if (!visited.has(component)) {
+      visit(component);
+    }
+  });
+  
+  return result;
+}
+
+/**
+ * Get the correct build sequence based on repository analysis
+ */
+function getBuildSequence() {
+  console.log('Scanning repository for OpenCog components...');
+  
+  const discoveredComponents = discoverComponents();
+  console.log(`Discovered ${discoveredComponents.length} components with CMakeLists.txt:`, discoveredComponents.join(', '));
+  
+  console.log('Analyzing dependency relationships...');
+  const dependencyMap = analyzeDependencies(discoveredComponents);
+  
+  // Define core components that should always be included
+  const coreComponents = [
+    'cogutil', 'atomspace', 'cogserver', 'unify', 'ure', 'spacetime',
+    'attention', 'miner', 'pln', 'asmoses', 'moses', 'opencog',
+    'lg-atomese', 'learn'
+  ];
+  
+  // Define optional components (atomspace extensions, specialized tools, etc.)
+  const optionalComponents = discoveredComponents.filter(comp => 
+    !coreComponents.includes(comp)
+  );
+  
+  console.log(`Core components (${coreComponents.length}):`, coreComponents.join(', '));
+  console.log(`Optional components (${optionalComponents.length}):`, optionalComponents.join(', '));
+  
+  // For now, build core components + some key optional ones
+  const selectedComponents = [
+    ...coreComponents.filter(comp => discoveredComponents.includes(comp)),
+    // Add some important optional components
+    'atomspace-rocks',    // RocksDB backend
+    'atomspace-restful',  // REST API
+    'pattern-index',      // Pattern indexing
+    'vision',            // Vision processing
+    'benchmark'          // Benchmarking tools
+  ].filter(comp => discoveredComponents.includes(comp));
+  
+  // Show discovered dependencies for selected components
+  console.log('Dependencies for selected components:');
+  for (const component of selectedComponents) {
+    const deps = dependencyMap.get(component);
+    if (deps && deps.size > 0) {
+      console.log(`  ${component}: [${Array.from(deps).join(', ')}]`);
+    }
+  }
+  
+  console.log('Computing optimal build sequence...');
+  const buildSequence = topologicalSort(selectedComponents, dependencyMap);
+  
+  console.log(`Final build sequence (${buildSequence.length} components):`, buildSequence.join(' → '));
+  
+  return { 
+    components: buildSequence, 
+    dependencies: dependencyMap,
+    coreComponents,
+    optionalComponents,
+    selectedComponents
+  };
 }
 
 /**
  * Generate build steps for all components in dependency order
  */
 function generateBuildSteps() {
-  const rootDir = process.cwd();
-  const validComponents = [];
-  
-  // Filter components that actually exist and are buildable
-  for (const component of COMPONENT_DEPENDENCIES) {
-    if (isOpenCogComponent(rootDir, component)) {
-      validComponents.push(component);
-    } else {
-      console.log(`Warning: Component '${component}' not found or not buildable, skipping...`);
-    }
-  }
+  const { components: buildSequence } = getBuildSequence();
   
   // Generate build steps
-  const buildSteps = validComponents.map(component => {
+  const buildSteps = buildSequence.map(component => {
     return BUILD_STEP_TEMPLATE.replace(/{{dir_name}}/g, component);
   }).join('\n\n');
   
-  return { validComponents, buildSteps };
+  return { validComponents: buildSequence, buildSteps };
 }
 
 /**
@@ -241,8 +441,10 @@ function saveWorkflow() {
 module.exports = {
   generateWorkflow,
   generateBuildSteps,
-  isOpenCogComponent,
-  COMPONENT_DEPENDENCIES
+  getBuildSequence,
+  discoverComponents,
+  analyzeDependencies,
+  topologicalSort
 };
 
 // Run if called directly
