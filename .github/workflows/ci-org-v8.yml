@@ -97,32 +97,52 @@ jobs:
       # 6. Build and Install MoSES
       - name: Build and Install MoSES
         run: |
-          # Clean existing directory
-          rm -rf moses
-          # Clone the repository
-          git clone https://github.com/opencog/moses.git
-          mkdir -p moses/build
-          cd moses/build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-          make -j2
-          sudo make install
-          sudo ldconfig
-          cd ../..
+          # Build local moses component (part of opencog-central monorepo)
+          COMPONENT="moses"
+          
+          echo "=== Building local $COMPONENT component ==="
+          
+          if [ -d "$COMPONENT" ]; then
+            echo "Local $COMPONENT directory found, building..."
+            
+            # Build the component
+            echo "Building $COMPONENT..."
+            mkdir -p "$COMPONENT/build"
+            cd "$COMPONENT/build"
+            cmake -DCMAKE_BUILD_TYPE=Release ..
+            make -j2
+            sudo make install
+            sudo ldconfig
+            cd ../..
+          else
+            echo "ERROR: Local $COMPONENT directory not found!"
+            exit 1
+          fi
 
       # 7. Build and Install AsmoSES
       - name: Build and Install AsmoSES
         run: |
-          # Clean existing directory
-          rm -rf asmoses
-          # Clone the repository
-          git clone https://github.com/opencog/asmoses.git
-          mkdir -p asmoses/build
-          cd asmoses/build
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-          make -j2
-          sudo make install
-          sudo ldconfig
-          cd ../..
+          # Build local asmoses component (part of opencog-central monorepo)
+          COMPONENT="asmoses"
+          
+          echo "=== Building local $COMPONENT component ==="
+          
+          if [ -d "$COMPONENT" ]; then
+            echo "Local $COMPONENT directory found, building..."
+            
+            # Build the component
+            echo "Building $COMPONENT..."
+            mkdir -p "$COMPONENT/build"
+            cd "$COMPONENT/build"
+            cmake -DCMAKE_BUILD_TYPE=Release ..
+            make -j2
+            sudo make install
+            sudo ldconfig
+            cd ../..
+          else
+            echo "ERROR: Local $COMPONENT directory not found!"
+            exit 1
+          fi
 
       # 9. Build and Install Unify
       - name: Build and Install Unify

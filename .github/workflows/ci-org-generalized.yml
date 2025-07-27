@@ -203,182 +203,52 @@ jobs:
       # Build and Install asmoses
       - name: Build and Install asmoses
         run: |
-          # Preserve local MOSES header modifications and perform safe update
+          # Build local asmoses component (part of opencog-central monorepo)
           COMPONENT="asmoses"
-          REPO_URL="https://github.com/opencog/asmoses.git"
           
-          echo "=== Processing $COMPONENT with local change preservation ==="
+          echo "=== Building local $COMPONENT component ==="
           
           if [ -d "$COMPONENT" ]; then
-            echo "Existing $COMPONENT directory found, checking for local modifications..."
-            cd "$COMPONENT"
+            echo "Local $COMPONENT directory found, building..."
             
-            # Check if this is a git repository
-            if [ -d ".git" ]; then
-              echo "Git repository detected, checking status..."
-              
-              # Check for uncommitted changes
-              if ! git diff-index --quiet HEAD --; then
-                echo "Local modifications detected! Backing up changes..."
-                
-                # Create a backup of modified files
-                BACKUP_DIR="../${COMPONENT}_backup_$(date +%s)"
-                mkdir -p "$BACKUP_DIR"
-                
-                # Backup all modified files (tracked and untracked)
-                git diff-index --name-only HEAD -- | while read -r file; do
-                  echo "Backing up modified file: $file"
-                  mkdir -p "$BACKUP_DIR/$(dirname "$file")" 2>/dev/null || true
-                  cp "$file" "$BACKUP_DIR/$file" 2>/dev/null || true
-                done
-                
-                # Also backup untracked files that might be headers
-                git ls-files --others --exclude-standard | grep -E '\.(h|hpp|hxx)$' | while read -r file; do
-                  echo "Backing up untracked header: $file"
-                  mkdir -p "$BACKUP_DIR/$(dirname "$file")" 2>/dev/null || true
-                  cp "$file" "$BACKUP_DIR/$file" 2>/dev/null || true
-                done
-                
-                echo "Changes backed up to: $BACKUP_DIR"
-                
-                # Stash changes for potential reapplication
-                git add -A
-                git stash push -m "CI backup: local modifications before update"
-                echo "Changes stashed successfully"
-              else
-                echo "No local modifications detected"
-              fi
-              
-              # Perform safe git update
-              echo "Performing safe git update..."
-              git fetch origin
-              git reset --hard origin/main || git reset --hard origin/master
-              
-              # Attempt to reapply stashed changes if they exist
-              if git stash list | grep -q "CI backup:"; then
-                echo "Attempting to reapply local modifications..."
-                if git stash pop; then
-                  echo "Local modifications successfully reapplied"
-                else
-                  echo "WARNING: Could not automatically reapply changes. Manual merge may be needed."
-                  echo "Backup available at: $BACKUP_DIR"
-                fi
-              fi
-            else
-              echo "Not a git repository, using fallback method..."
-              cd ..
-              # Create backup then clean clone
-              BACKUP_DIR="${COMPONENT}_backup_$(date +%s)"
-              cp -r "$COMPONENT" "$BACKUP_DIR"
-              echo "Full backup created at: $BACKUP_DIR"
-              rm -rf "$COMPONENT"
-              git clone "$REPO_URL"
-            fi
-            cd ..
+            # Build the component
+            echo "Building $COMPONENT..."
+            mkdir -p "$COMPONENT/build"
+            cd "$COMPONENT/build"
+            cmake -DCMAKE_BUILD_TYPE=Release ..
+            make -j2
+            sudo make install
+            sudo ldconfig
+            cd ../..
           else
-            echo "No existing $COMPONENT directory, performing fresh clone..."
-            git clone "$REPO_URL"
+            echo "ERROR: Local $COMPONENT directory not found!"
+            exit 1
           fi
-          
-          # Build the component
-          echo "Building $COMPONENT..."
-          mkdir -p "$COMPONENT/build"
-          cd "$COMPONENT/build"
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-          make -j2
-          sudo make install
-          sudo ldconfig
-          cd ../..
 
       # Build and Install moses
       - name: Build and Install moses
         run: |
-          # Preserve local MOSES header modifications and perform safe update
+          # Build local moses component (part of opencog-central monorepo)
           COMPONENT="moses"
-          REPO_URL="https://github.com/opencog/moses.git"
           
-          echo "=== Processing $COMPONENT with local change preservation ==="
+          echo "=== Building local $COMPONENT component ==="
           
           if [ -d "$COMPONENT" ]; then
-            echo "Existing $COMPONENT directory found, checking for local modifications..."
-            cd "$COMPONENT"
+            echo "Local $COMPONENT directory found, building..."
             
-            # Check if this is a git repository
-            if [ -d ".git" ]; then
-              echo "Git repository detected, checking status..."
-              
-              # Check for uncommitted changes
-              if ! git diff-index --quiet HEAD --; then
-                echo "Local modifications detected! Backing up changes..."
-                
-                # Create a backup of modified files
-                BACKUP_DIR="../${COMPONENT}_backup_$(date +%s)"
-                mkdir -p "$BACKUP_DIR"
-                
-                # Backup all modified files (tracked and untracked)
-                git diff-index --name-only HEAD -- | while read -r file; do
-                  echo "Backing up modified file: $file"
-                  mkdir -p "$BACKUP_DIR/$(dirname "$file")" 2>/dev/null || true
-                  cp "$file" "$BACKUP_DIR/$file" 2>/dev/null || true
-                done
-                
-                # Also backup untracked files that might be headers
-                git ls-files --others --exclude-standard | grep -E '\.(h|hpp|hxx)$' | while read -r file; do
-                  echo "Backing up untracked header: $file"
-                  mkdir -p "$BACKUP_DIR/$(dirname "$file")" 2>/dev/null || true
-                  cp "$file" "$BACKUP_DIR/$file" 2>/dev/null || true
-                done
-                
-                echo "Changes backed up to: $BACKUP_DIR"
-                
-                # Stash changes for potential reapplication
-                git add -A
-                git stash push -m "CI backup: local modifications before update"
-                echo "Changes stashed successfully"
-              else
-                echo "No local modifications detected"
-              fi
-              
-              # Perform safe git update
-              echo "Performing safe git update..."
-              git fetch origin
-              git reset --hard origin/main || git reset --hard origin/master
-              
-              # Attempt to reapply stashed changes if they exist
-              if git stash list | grep -q "CI backup:"; then
-                echo "Attempting to reapply local modifications..."
-                if git stash pop; then
-                  echo "Local modifications successfully reapplied"
-                else
-                  echo "WARNING: Could not automatically reapply changes. Manual merge may be needed."
-                  echo "Backup available at: $BACKUP_DIR"
-                fi
-              fi
-            else
-              echo "Not a git repository, using fallback method..."
-              cd ..
-              # Create backup then clean clone
-              BACKUP_DIR="${COMPONENT}_backup_$(date +%s)"
-              cp -r "$COMPONENT" "$BACKUP_DIR"
-              echo "Full backup created at: $BACKUP_DIR"
-              rm -rf "$COMPONENT"
-              git clone "$REPO_URL"
-            fi
-            cd ..
+            # Build the component
+            echo "Building $COMPONENT..."
+            mkdir -p "$COMPONENT/build"
+            cd "$COMPONENT/build"
+            cmake -DCMAKE_BUILD_TYPE=Release ..
+            make -j2
+            sudo make install
+            sudo ldconfig
+            cd ../..
           else
-            echo "No existing $COMPONENT directory, performing fresh clone..."
-            git clone "$REPO_URL"
+            echo "ERROR: Local $COMPONENT directory not found!"
+            exit 1
           fi
-          
-          # Build the component
-          echo "Building $COMPONENT..."
-          mkdir -p "$COMPONENT/build"
-          cd "$COMPONENT/build"
-          cmake -DCMAKE_BUILD_TYPE=Release ..
-          make -j2
-          sudo make install
-          sudo ldconfig
-          cd ../..
 
       # Build and Install opencog
       - name: Build and Install opencog
